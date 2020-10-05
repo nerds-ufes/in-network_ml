@@ -1,0 +1,13 @@
+# Prerequisites
+*.pcap
+*.dot
+*.png
+*.txt
+*.pdf
+*.json
+*.sav
+*.csv
+!tmp/*.txt
+!tmp/*.png
+!tmp/*.pdf
+!emulation/sources/*.txt

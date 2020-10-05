@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Copyright 2013-present Barefoot Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#P4APP_IMAGE=${P4APP_IMAGE:-p4lang/p4app:rc-2.0.0}
+P4APP_IMAGE=${P4APP_IMAGE:-ml/p4:latest}
+P4APP_CONTAINER_ARGS=${P4APP_CONTAINER_ARGS:-""}
+
+
+myrealpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
+P4APP_LOGDIR=$(myrealpath "${P4APP_LOGDIR:-/tmp/p4app-logs}")
+
+
+function get_abs_filename() {
+  # Convert a possibly-relative path to an absolute path.
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
+function normalize_path() {
+  # Remove any trailing slash from the provided path.
+  echo ${1%/}
+}
+
+function run-p4app {
+  APP_TO_RUN=/p4app
+  P4APP_NAME=${P4APP_NAME:-"p4app_$RANDOM"}
+  # XXX this is for X support (e.g. opening xterm)
+  #XSOCK=/tmp/.X11-unix
+  #XAUTH=/tmp/.docker.xauth
+            #\ -v $XAUTH:$XAUTH -e XAUTHORITY=$XAUTH \
+  #xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
+  #          -v $XSOCK:$XSOCK \
+  docker run --privileged --interactive --tty --rm \
+            --name "$P4APP_NAME" \
+            -v "$1":"$APP_TO_RUN" \
+            -v "$P4APP_LOGDIR":/tmp/p4app-logs \
+             $P4APP_CONTAINER_ARGS \
+             $P4APP_IMAGE "${@:2}"
+}
+
+function run-command {
+  # Run the .p4app package provided by the user.
+  if [ -d "$1" ]; then
+    APP_DIR=$(get_abs_filename "$1")
+    run-p4app "$APP_DIR" "${@:2}"
+    rc=$?
+  else
+    echo "Couldn't read p4app package: $1"
+    exit 1
+  fi
+  return $rc
+}
+
+
+function update-command {
+  docker pull $P4APP_IMAGE
+}
+
+function exec-command {
+  container_id=${P4APP_NAME:-$(docker ps | grep -m1 p4app_ | awk '{print $1}')}
+
+  if [ -z "$container_id" ]; then
+      (>&2 echo "Couldn't find any p4app currently running.")
+      exit 1
+  fi
+
+  if [ -t 1 ]; then
+      # Called from a terminal, be interactive
+      docker exec -it $container_id ${@:1}
+  else
+      # Inside a pipe, don't allocate a ptty
+      docker exec $container_id ${@:1}
+  fi
+}
+
+function usage-command {
+  echo "Usage:"
+  echo "  p4app run <program.p4app>"
+  echo "      Run a p4app."
+  echo "  p4app update"
+  echo "      Update the toolchain to the newest version."
+  echo "  p4app exec <command>"
+  echo "      Execute a command on the most recent p4app instance."
+  exit 1
+}
+
+case "$1" in
+  "run")
+    run-command "${@:2}"
+    ;;
+  "update")
+    update-command "${@:2}"
+    ;;
+  "exec")
+    exec-command "${@:2}"
+    ;;
+  *)
+    usage-command
+    ;;
+esac
