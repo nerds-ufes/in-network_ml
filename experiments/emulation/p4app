@@ -45,8 +45,6 @@ function run-p4app {
   #xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
   #          -v $XSOCK:$XSOCK \
   
-  echo "/p4app/pcap2/":"$APP_TO_RUN"
-
   docker run --privileged --interactive --tty --rm \
             --name "$P4APP_NAME" \
             -v "$1":"$APP_TO_RUN" \

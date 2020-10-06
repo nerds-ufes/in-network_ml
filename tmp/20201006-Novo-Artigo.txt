@@ -1,0 +1,28 @@
+
+
+
+Machine learning in-network well performed into the switches
+
+2. hard-coded vs. Soft rules
+2.1 if-then-else statement
+2.2 Mach-Action rules
+2.3 Devices limitations
+
+3. experiments
+3.1 Internal crossing time
+3.2 INT completion time 
+
+4. related works
+
+5. conclusion
+
+--------------------------
+não abordar 2.1
+Mudar o foco do desempenho 
+  - abordar qualidade do classificador com regras de Mach-Action.
+  - Avaliar P4-Mellanox
+  - Avaliar P4-Toffino (RARE)
+  - (Contribuição) Tradeoff entre primitivas P4, desempenho e qualidade
+
+Foco no pacote
+Novo elemento ativo (Controlador)
