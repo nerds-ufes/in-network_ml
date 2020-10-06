@@ -44,10 +44,14 @@ function run-p4app {
             #\ -v $XAUTH:$XAUTH -e XAUTHORITY=$XAUTH \
   #xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
   #          -v $XSOCK:$XSOCK \
+  
+  echo "/p4app/pcap2/":"$APP_TO_RUN"
+
   docker run --privileged --interactive --tty --rm \
             --name "$P4APP_NAME" \
             -v "$1":"$APP_TO_RUN" \
             -v "$P4APP_LOGDIR":/tmp/p4app-logs \
+            -v "$1"/../../pcap:"/p4app/pcap/" \
              $P4APP_CONTAINER_ARGS \
              $P4APP_IMAGE "${@:2}"
 }

@@ -7,6 +7,7 @@
 *.json
 *.sav
 *.csv
+*.zip
 !tmp/*.txt
 !tmp/*.png
 !tmp/*.pdf
