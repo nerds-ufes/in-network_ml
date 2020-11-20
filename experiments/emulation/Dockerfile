@@ -24,7 +24,7 @@ ENV MININET_DEPS automake \
                  help2man \
                  iperf \
                  iperf3 \
-                 iproute \
+                 #iproute2 \
                  libtool \
                  make \
                  pkg-config \
@@ -39,14 +39,15 @@ ENV MININET_DEPS automake \
                  pyflakes \
                  pylint \
                  python-pexpect \
-                 python-setuptools
-
+                 python-setuptools 
 # Ignore questions when installing with apt-get:
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends $NET_TOOLS $MININET_DEPS
+RUN apt-get update 
+RUN apt-get install -y --no-install-recommends $NET_TOOLS $MININET_DEPS
+RUN rm /usr/bin/python && ln -s /usr/bin/python2.7 /usr/bin/python
 
+RUN pip install --upgrade pip
 # Fix to get tcpdump working
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 
