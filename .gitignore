@@ -13,4 +13,9 @@
 !tmp/*.pdf
 !emulation/sources/*.txt
 !graphs/*.pdf
-!graphs/*.txt
+!graphs/baseline/*.txt
+!graphs/tree/*.txt
+!graphs/baseline_e/*.txt
+!graphs/tree_e/*.txt
+!graphs/flow/*.txt
+
