@@ -12,3 +12,4 @@
 !tmp/*.png
 !tmp/*.pdf
 !emulation/sources/*.txt
+!graph/*.pdf
