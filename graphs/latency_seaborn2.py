@@ -10,8 +10,8 @@ def load_dateset(dir, rate, size, df_ ):
     )
     df = pd.read_csv(f_name, header=None, names=['lat'])
 
-    df['scenario'] = dir
-    df['throwput'] = rate
+    df['scenario'] = f'{dir}: {rate}'
+    #df['throwput'] = rate
     df['pkts'] = size #(1000000*rate)/(size+20)
     
     return pd.concat([df_, df])
@@ -41,9 +41,9 @@ def main(rel, dir, name):
         df = load_rate2(dir, 102, pd.DataFrame())
         df = load_rate2(dir, 1024, df)
 
-    g = sns.relplot(x='pkts', y='lat', hue="scenario", style="throwput", markers=True, err_style="bars", sort=False, kind="line", data=df)
+    g = sns.catplot(x='pkts', y='lat', hue="scenario", kind="box", data=df)
     g.set(xlabel = 'Packet Size (Bytes)', ylabel = 'Latency ($u$s)')
-    plt.savefig(f"{name}_{rel}.pdf")
+    plt.savefig(f"{name}_{rel}2.pdf")
     plt.show()
 
 dir1 = ['baseline', 'tree']
