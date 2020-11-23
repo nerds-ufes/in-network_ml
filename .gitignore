@@ -13,3 +13,4 @@
 !tmp/*.pdf
 !emulation/sources/*.txt
 !graphs/*.pdf
+!graphs/*.txt
