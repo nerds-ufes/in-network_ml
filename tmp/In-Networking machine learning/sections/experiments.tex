@@ -1,0 +1,184 @@
+\section{Case Study: Intrusion Detection} \label{sec:case}
+
+In this section, we present a use case for validation of our framework with a scenario of IDS (\emph{Intrusion Detection System}). More specifically, we show that a simple machine learning model (a single decision tree) can be deployed into a SmartNIC to accurately detect different types of attacks (Section \ref{sub:classres}) with acceptable latency degradation (Section \ref{sub:latency}). We describe the dataset that we used, the challenges involved, and our experimental setup in Sections \ref{sub:dataset}, \ref{sub:challenges}, and \ref{sub:expset}, respectively. We emphasize that all our code will be made publicly available upon the publication of this manuscript.
+
+\subsection{Dataset}\label{sub:dataset}
+
+To conduct our experiments, we relied on the dataset created and made available by Sharafaldin \emph{et al.} \cite{sharafaldin2018toward}. 
+The dataset is composed of PCAP files related to network traffic generated in five days (Monday to Friday), whose flows were labeled as being benign or a specific type of attack. The authors argue that they addressed many of the issues related to older, and possibly outdated, datasets.
+Moreover, they show that machine learning can be used to accurately distinguish the types of flows by applying well-known algorithms and carefully-designed feature extraction/selection strategies.
+It is not our goal to dig into the details about the characteristics of each type of flow, how they were generated, or how they were used for classification purposes, and we refer the interested reader to the aforementioned manuscript for more information.
+
+From the available data, we selected the PCAP files from two days (Wednesday and Thursday), which contain flows related to seven types (or classes), one \emph{benign} (BE) and six attacks: \emph{DOS GoldenEye} (GE), \emph{DOS Hulk} (HK), \emph{DOS Slowhttptest} (SH), \emph{DOS Slowloris} (SL), \emph{Web Brute-force} (BF), and \emph{Port Scan} (PS). 
+There are other types of attacks in these two days, but we decided to remove them from our analysis due to extremely low frequency.
+A brief summary of the dataset that we are using is presented in Table \ref{tab:datasummary}.
+
+\begin{table}[t]
+    \centering
+    \caption{Dataset Summary}
+    \begin{tabular}{|l|c|c|}
+    \hline
+       Class  & Number of flows & Number of packets \\
+    \hline
+      Benign (BE)           & 436,183 & 12,260,490\\
+      DOS GoldenEye (GE)    & 7,574 & 66,795 \\
+      DOS Hulk (HK)         & 14,108 & 1,245,906\\
+      DOS Slowhttptest (SH) & 4,218 & 32,510 \\
+      DOS Slowloris (SL)    & 3,894 & 37,236\\
+      Web Brute-force (BF)  & 1,356 & 19,755\\
+      Port Scan (PS)        & 67,579 & 174,312\\
+    \hline
+    \end{tabular}
+    \label{tab:datasummary}
+\end{table}
+
+\subsection{Challenges}\label{sub:challenges}
+
+A natural step to deploy a machine learning model to perform intrusion detection into the data plane would be using the features and models studied in \cite{sharafaldin2018toward}. To that end, one could simply use the P4 language to write code to compute the features and to perform the classification. Unfortunately, there are issues related to software, hardware, and the nature of the application itself that prevent such a direct approach. The most important ones are enumerated below: 
+\begin{enumerate}
+    \item P4 is not a general-purpose programming language. Therefore, many of the features used in \cite{sharafaldin2018toward} can not be directly (and maybe not efficiently) computed (or adapted) using P4. \label{question:feature}
+    \item From a practical point of view, classifying a flow after it ends is not a useful task, because the intrusion may have already happened. An in-network IDS must be able to accurately identify a malicious flow as soon as possible to prevent harm.\label{question:early}
+    \item Classifying flows requires keeping per-flow table entries to store the their respective features values. Moreover, these entries must be updated after every package belonging to the flow passes through the hardware where the model is deployed. Therefore, it is necessary to understand whether the overhead of performing a table lookup, entry update, and flow classification is not prohibitive in a high-throughput environment.\label{question:perf}
+    \item If instead of classifying flows, due to the cost of the classification, one decides to classify packets individually, then it is not necessary to maintain per-flow table entries. In other words, in a per-packet scenario, the overhead related to table lookup, entry update, and memory usage is not present anymore. However, a single package may be considerably less informative than a flow with regard to the classification task. Hence, it is necessary to understand the trade-off between per-packet and per-flow models.   \label{question:packets}
+\end{enumerate}
+Next, we present our implementation decisions and experimental methodology to address the four challenges listed above.
+
+\subsection{Experimental setup}\label{sub:expset}
+
+\input{sections/features_table}
+
+\begin{table*}[t]
+\centering{
+\caption{Summary of classification results}
+\begin{tabular}{llll|lll|lll}
+\hline
+\hline
+                       & \multicolumn{3}{c}{Per-flow - After Last Packet} & \multicolumn{3}{c}{Per-flow - After First Packet} & \multicolumn{3}{c}{Per-packet} \\ \cline{2-10}
+                       & Precision & Recall & F1-score & Precision & Recall & F1-score & Precision & Recall & F1-score \\ \cline{2-10}
+Benign (BE)            & 0.97 &    0.99 &      0.98   &  0.98 &    0.97 &      0.98      & 1.00           &   0.98     &   0.99       \\
+DOS GoldenEye (GE)    & 1.00 &    0.87 &      0.93   &  0.00 &    0.00 &      0.00      & -              &   0.00     &   -          \\
+DOS Hulk (HK)         & 1.00 &    1.00 &      1.00   &  -    &    0.00 &      -         & 0.78           &   1.00     &   0.87       \\
+DOS Slowhttptest (SH) & 0.87 &    0.94 &      0.90   &  -    &    0.00 &      -         & 0.84           &   0.15     &   0.25       \\
+DOS Slowloris (SL)    & 0.99 &    0.95 &      0.97   &  -    &    0.00 &      -         & 0.97           &   0.63     &   0.77       \\
+Web Brute-force (BF)  & 0.69 &    0.95 &      0.80   &  0.04 &    1.00 &      0.08      & 0.61           &   0.18     &   0.28       \\
+Port Scan (PS)       & 1.00 &    0.94 &      0.97   &  1.00 &    0.94 &      0.97      & 1.00           &   0.71     &   0.83       \\
+\textbf{All Attacks combined}   & 0.99 &    0.96 &      0.97   &  0.99 &    0.96 &      0.97      & 0.86           &   0.96     &   0.91        \\
+\hline
+\hline
+\end{tabular}
+\label{tab:classres}
+}
+\end{table*}
+
+\begin{figure*}[t]
+    \vspace{0.5cm}
+    \centering
+    \includegraphics[scale=1.1]{figures/cmlast.pdf}\hspace{0.5cm}
+    \includegraphics[scale=1.1]{figures/cmfirst.pdf}\hspace{0.5cm}
+    \includegraphics[scale=1.1]{figures/cmpacket.pdf}
+    \caption{Confusion matrices for: per-flow classification after the last (left) and the first (middle) packets of each flow are observed; and per-packet classification (right). Values are normalized by the sum of each row.}
+    \label{fig:flowclassres}
+\end{figure*}
+
+In order to compare the per-packet and per-flow strategies, we decided to create two models, one trained with features from individual packets and another with features from flows. 
+Table \ref{tab:feature} shows the features used when building each model. One advantage of working with flows is the possibility of having features which can capture their dynamics (e.g., \emph{duration} and \emph{cumulative packet size} at a given moment), which cannot be accomplished by relying only on packets. One disadvantage of working with flows is the impossibility of directly computing better descriptive measures (e.g., \emph{average}, \emph{variance}, and \emph{standard deviation}) for the time-varying features, since important operations, such as division and square root, are not supported in P4. 
+In the per-packet case, our choice of features was motivated by \cite{xiong2019switches}. In fact, we used the same ones, except the IPv6-related features (once the dataset in use only contains IPv4 traffic) and TCP/UDP source port (once they are, in general, randomly chosen by the operating system \cite{larsen2011recommendations}).
+
+
+In our next step, we extracted two samples from the dataset, one for training and the other for testing the models. To that end, we randomly sampled 100 thousand flows for the training set and another 100 thousand flows for the test set. In both cases, the proportions of flows in each class were set to be the same as in the whole dataset.
+
+Although we used the same training set for the per-flow and per-packet models, the feature extraction process differs significantly in these two cases.
+In the per-packet case, we simply extracted the features described in Table \ref{tab:feature} from five, randomly selected, packets from each flow.
+The per-flow case is more complicated, once features must be extracted from flows, not packets. For each flow in the training set, we updated the values of the features in Table \ref{tab:feature} after processing each packet of the flow in the same order as they appear in the original PCAP files.
+Then, we took five equally-spaced samples from the sequence of features states (we used the percentiles 20\%, 40\%, 60\%, 80\% and 100\% as the observation points to ensure that each flow was sampled at different stages). 
+
+To create the models, we relied on Python's \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/}} implementation of the decision tree classifier, and we used cross-validation to choose the best hyperparameters  (e.g., tree height and minimum number of items per leaf) in order to avoid overfitting.
+
+Finally, we conducted two experiments to test the models. First, we applied the per-packet model to all packets in the test set, and the per-flow model to all flows (each flow was classified once for each one of its packets).
+This experiment was performed using a Python script and a BMv2 emulator \cite{p4-bmv2}, and it aimed at assessing the quality of the models (according to several classification metrics) and observing the behavior of the P4 code in a controlled environment. 
+
+Our second experiment was designed to understand the overhead added to standard packet processing in order to execute the operations necessary to the classification task (feature extraction, updating features values, and classifying the flow).
+To that end, we deployed each model into a Netronome\footnote{\url{https://www.netronome.com/products/agilio-cx/}} SmartNIC (Agilio  CX2x10GbE), connected via PCI Express 3.0 to an Intel(R) Xeon(R) CPU E5-2620 v3 @ 2.40GHz processor and 16GB of RAM. This SmartNIC has two physical and four virtual interfaces. In this experiment, we randomly selected 100 thousand packets and we sent these packets, one at a time, to the virtual interface \texttt{vf0\_0}. Then, inside the SmartNIC, each packet was handled according to four versions of our P4 application:
+\begin{enumerate}
+    \item The first version simply forwards the packet to the virtual interface \texttt{vf0\_1}. The purpose of this version is to serve as baseline.
+    \item The second version contains the per-packet model. It extracts the per-packet features listed in Table \ref{tab:feature}, classifies the packet, and then forwards it to the virtual interface \texttt{vf0\_1}.
+    \item The third version contains the per-flow model. It extracts the per-flow features from the packet, updates the features values related to the flow containing the packet, and forwards the packet to the virtual interface \texttt{vf0\_1}.
+    \item Finally, the fourth version is similar to the third one, but it also classifies the flow, with the per-flow model, before forwarding the packet to the virtual interface \texttt{vf0\_1}.
+\end{enumerate}
+In all these cases, we computed the time different between the instant immediately after the packet enters the virtual interface \texttt{vf0\_0} and the instant right before the packet leaves the SmartNIC via virtual interface \texttt{vf0\_1}.
+
+\subsection{Classification Results}\label{sub:classres}
+
+
+
+% talk about most relevant rules...
+%\gtodo{Bruno:}{I think it would be interesting here for us to have a example of a tree, or a part of one.}
+
+Table \ref{tab:classres} and Figure \ref{fig:flowclassres} summarize the classification results for our per-flow and per-packet models, including the \emph{confusion matrices}, \emph{precision}, \emph{recall}, and \emph{F1-Score}.
+We used the per-flow model in two scenarios: for classifying each flow after it finishes (i.e., after its \emph{last} packet is observed) and to classify each flow after it is just born (i.e., after its \emph{first} packet is observed). The former is not useful in practice, but it gives an upper bound with regard to the quality that our models can achieve. Similarly, the latter gives us a lower bound.
+Moreover, the last row of Table \ref{tab:classres} contains the results for the binary version of the problem, where the model is used to distinguish between \emph{benign} and \emph{attack} (regardless of the type of attack).
+
+
+On one hand, it is possible to observe that classifying a flow after it finishes yields high F1-score values. In fact, these numbers are close to the results obtained in \cite{sharafaldin2018toward}, when a larger number of (more complex) features was available. On the other hand, the same is not true when the classification is performed right after a new flow appears. The \emph{benign} class still has high F1-score, but most of the attacks are incorrectly classified as \emph{Web Brute-force}. These numbers may suggest that classifying a 
+``young'' flow is a nearly-infeasible task, but it is important to emphasize that if one is interested only in distinguishing between \emph{benign} and \emph{attack}, then a 0.97 F1-score is achieved.
+
+Motivated by the possibility of classifying ``young'' flows, we computed the number of packets that need to be observed in each flow in order to obtain the correct classification result for the first time (given that such correct result is eventually obtained). As shown in Figure \ref{fig:flowuntil}, with the exception of the class \emph{DOS GoldenEye}, with five packets, most of the flows are properly labeled. Moreover, for some classes, including \emph{benign}, observing one or two packets is enough.
+
+The per-packet model has similar results to the second per-flow scenario (after observing only the first packet). In other words, the per-packet model is not capable of distinguishing different types of attacks, but it yields reasonable results in the \emph{benign} \emph{vs.} \emph{attack} problem, although a considerable fraction of malicious packets are labeled as \emph{benign}.
+
+One issue that can arise with a packet-based model is the \emph{fragmentation} of flows. Suppose that a packet of a legit TCP flow is incorrectly labeled as malicious. This scenario may lead to unexpected (and potentially disastrous) behaviour if, for instance, the network is careless programmed to immediately drop such a packet.
+Hence, it is important to understand whether our per-packet model classifies packets from the same flow differently. According to Figure \ref{fig:packetclassres}, fragmentation does arise in many cases. However, it is important to notice that in the \emph{benign} class, around 97\% of the flows did not suffer from the fragmentation issue.
+
+\begin{center}
+\begin{figure}[t]
+    \centering
+    \includegraphics{figures/cdfuntil.pdf}
+    \caption{Empirical cumulative distributions for number of observed packets within a flow until correct classification result is obtained with the per-flow model. Only computed for flows that were correctly classified after observing its last packet.}
+    \label{fig:flowuntil}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics{figures/cdffrag.pdf}
+    \caption{Empirical cumulative distribution for the fraction of correctly classified packets within the same flow according to the per-packet model.}
+    \label{fig:packetclassres}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics{figures/cdftime.pdf}
+    \caption{Empirical cumulative distribution for the time that a packet takes to traverse (in and out) the whole pipeline at the SmartNIC in different scenarios.}
+    \label{fig:cdftime}
+\end{figure}
+\end{center}
+
+
+
+
+\subsection{Performance Evaluation Results}\label{sub:latency}
+
+Our last set of results concerns the cost of performing in-network flow and packet classification. Figure \ref{fig:cdftime} presents the distributions of the time that a packet resides inside the SmartNIC according to the four versions of our P4 application enumerated in Section \ref{sub:expset}. The time that a packet needs to be forwarded from \texttt{vf0\_0} to \texttt{vf0\_1} averages around 100ns. The cost added to classify packets, using the per-packet model, is almost negligible. However, a significant overhead arises when we use the per-flow model. The necessary time for extracting the features of a packet and updating its respective flow entry averages around 400ns, and when the classification is performed as well, the total time that takes to process a single packet rises, in average, to about 650ns. 
+
+\begin{figure}
+    \vspace{0.3cm}
+    \centering
+    \includegraphics[scale=0.13,valign=t]{figures/tree-flow.pdf}
+    \includegraphics[scale=0.13,valign=t]{figures/tree-pkt.pdf}
+    \caption{Structure of each decision tree model: (left) per-flow and  (right) per-packet.}
+    \label{fig:tree}
+\end{figure}
+
+One interesting aspect of Figure \ref{fig:cdftime} is the difference between the costs of the classification operations performed by the per-packet and per-flow models. Since the per-packet classification overhead is negligible, one should expect that the per-flow classification overhead (without the operations of features extraction and flow update) should be negligible as well. In order to dig deeper into this issue, we looked at the difference between the complexities of these two models. If the per-flow model were significantly more complex than the per-packet one, then a significant cost difference could be explained. However, Figure \ref{fig:tree} shows that, although there is a difference between the two trees (especially with regard to their heights), it is not as significant as the difference in the overheads.
+Therefore, there are more intricate reasons (e.g., memory management) responsible for the distinction between the per-flow and per-packet classification costs.
+
+\subsection{Considerations}\label{sub:disc}
+
+The results that we described in this section entail a series of important considerations. Perhaps, the most important one is the clear trade-off between accuracy and efficiency when choosing a per-packet or per-flow model. On one hand, classifying a flow leads to more accurate results, at the cost of keeping a per-flow table. On the other hand, despite having low overhead, the per-packet model has lower accuracy and suffers from the issue of flow fragmentation. In summary, choosing one or the other is a decision that can only be made after carefully analyzing the application requirements. 
+
+In spite of our high-accuracy results, we do not claim that our decision tree models are ready to be deployed in the wild. First, traffic patterns are always changing. Even though the datasets that we used were carefully generated \cite{sharafaldin2018toward}, it is possible that over time they become outdated, and a machine learning model is only as good as the representativeness of the training set. Second, a per-flow model may be memory-intensive since it requires storing flow-related metrics. Eventually, the network device may run out of memory, leading to extreme performance degradation. The solution to both of these problems passes through the interaction between the control and data planes. More specifically, the control plane can assume the role of removing inactive flow-entries from the device's memory and receiving important monitoring information from the data plane. Then, such information can be sent to the knowledge plane in order to help building a better model. 
+
+Another important consideration is related to the limitations of our performance evaluation study. We showed that the latency overhead for the per-packet model is negligible, but the per-flow models inflate the forward time in 6.5x. Despite informative, it is also important to understand the impact of our models on the device's throughput under different scenarios.
+
+Finally, it is possible to alleviate the per-flow classification cost significantly. We can use the fact that few packets are necessary to correctly classify a flow. To do so, we can change our P4 program to stop computing statistics about a flow after observing a predetermined number of packets, deleting its respective table entry, and marking the flow, in another table, accordingly to its inferred class. This new table stores less per-flow bytes and it allows the next packets to be properly labeled without the need of updating the flow statistics and applying the classification operation.
+
+We emphasize that all these limitations and considerations are subjects of our ongoing/future work.
+
+

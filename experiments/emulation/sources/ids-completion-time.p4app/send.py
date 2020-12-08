@@ -28,8 +28,6 @@ class IPOption_INT(IPOption):
                     FieldLenField("length", None, fmt="B",
                                   length_of="int_headers",
                                   adjust=lambda pkt,l:l*2+8),
-                    ShortField("count", 0),
-                    PacketListField("int_headers",
                                    [],
                                    SwitchTrace,
                                    count_from=lambda pkt:(pkt.count*1)) ]

@@ -1,0 +1,70 @@
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[t]
+\caption{Per-flow and Per-packet features}
+\begin{tabular}{|l|l|p{4.2cm}|}
+\hline
+\textbf{Model}      & \textbf{Feature} & \textbf{Short description}                                                                                                                                                                \\ \hline
+\multirow{11}{*}{Per-flow}  & EtherType        & From Ethernet header                                                                                                                                                                      \\ \cline{2-3} 
+                            & Protocol         & From IPv4 header                                                                                                                                                                          \\ \cline{2-3} 
+                            & CumIPv4Flag\_$X$ & Cumulative number of occurrences of the IPv4 flag $X$, for each $X\in\{\text{DF}, \text{MF}\}$                                                                                            \\ \cline{2-3} 
+                            & TcpDstPort       & TCP destination port                                                                                                                                                                      \\ \cline{2-3} 
+                            & UdpDstPort       & UDP destination port                                                                                                                                                                      \\ \cline{2-3} 
+                            & CumPacketSize    & Cumulative sum of IPv4 packet size                                                                                                                                                        \\ \cline{2-3} 
+                            & FlowDuration     & Time interval since the arrival of the first packet                                                                                                                                       \\ \cline{2-3} 
+                            & MaxPacketSize    & Size of the largest packet                                                                                                                                                                \\ \cline{2-3} 
+                            & MinPacketSize    & Size of the smallest packet                                                                                                                                                               \\ \cline{2-3} 
+                            & NumPackets       & Number of packets                                                                                                                                                                         \\ \cline{2-3} 
+                            & CumTcpFlag\_$X$  & Cumulative number of occurrences of the TCP flag $X$, for each $X\in\{\text{FIN}, \text{SYN}, \text{RST}, \text{PSH}, \text{ACK},\text{URG}\}$                                            \\ \hline
+\multirow{7}{*}{Per-packet} & EtherType        & From Ethernet header                                                                                                                                                                      \\ \cline{2-3} 
+                            & Protocol         & From IPv4 header                                                                                                                                                                          \\ \cline{2-3} 
+                            & IPv4Flag\_$X$    & Indicates whether IPv4 flag $X$ is set, for each $X\in\{\text{DF}, \text{MF}\}$                                                                                                           \\ \cline{2-3} 
+                            & TcpDstPort       & TCP destination port                                                                                                                                                                      \\ \cline{2-3} 
+                            & UdpDstPort       & UDP destination port                                                                                                                                                                      \\ \cline{2-3} 
+                            & PacketSize       & IPv4 packet size                                                                                                                                                                          \\ \cline{2-3} 
+                            & TcpFlag\_$X$     & Indicates whether the TCP flag $X$ is set, for each $X\in\{\text{FIN}, \text{SYN}, \text{RST}, \text{PSH}, \text{ACK},\text{URG}\}$ 
+                                                    \\ \hline
+\end{tabular}
+\label{tab:feature}
+\end{table}
+
+
+
+
+
+\if 0
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[ht]
+ \centering
+\begin{tabular}{lll}
+\hline
+\multicolumn{1}{|l|}{\textbf{Type of model}}               & \multicolumn{1}{l|}{\textbf{Features}}      & \multicolumn{1}{l|}{\textbf{Description}}                                                                                                                         \\ \hline
+\multicolumn{1}{|c|}{\multirow{Per-flow}}  & \multicolumn{1}{l|}{Eher Tpye}     & \multicolumn{1}{l|}{From Ethernet header}                                                                                                                \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Protocol}      & \multicolumn{1}{l|}{From IPv4 header}                                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Df}            & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences \\of the "df" flag in the IPv4 header of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Mf}            & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences \\of the "mf" flag in the IPv4 header  of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Tcp Dst Port}  & \multicolumn{1}{l|}{Destination port From Tcp header}                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Udp Dst Port}  & \multicolumn{1}{l|}{Destination port From Udp header}                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Total Pkt Len} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative packet length in bytes \\from IPv4 header\end{tabular}}                                                                                  \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Flow Duration} & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Time interval from the arrival of \\the first packet of the flow to\\the current packet\end{tabular}}     \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Max Pkt Len}   & \multicolumn{1}{l|}{Maximum flow packet length}                                                                                                          \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Min Pkt Len}   & \multicolumn{1}{l|}{Minimum flow packet length}                                                                                                          \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Pkts}          & \multicolumn{1}{l|}{Number of packets in the flow}                                                                                                       \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Fin}           & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences of\\ the "FIN" flag in the Tcp header of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Syn}           & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences of\\ the "SYN" flag in the Tcp header of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Rst}           & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences of\\ the "RST" flag in the Tcp header of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Psh}           & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences of\\ the "PSH" flag in the Tcp header of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Ack}           & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences of\\ the "ACK" flag in the Tcp header of \\the flow packets\end{tabular}} \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Urg}           & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Cumulative number of occurrences of\\ the "URG" flag in the Tcp header of \\the flow packets\end{tabular}} \\ \hline
+\multicolumn{1}{|c|}{\multirow{Per-packet}} & \multicolumn{1}{l|}{Eher Tpye}     & \multicolumn{1}{l|}{From Ethernet header}                                                                                                                \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Protocol}      & \multicolumn{1}{l|}{From IPv4 header}                                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Tcp Dst Port}  & \multicolumn{1}{l|}{Destination port from Tcp header}                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Udp Dst Port}  & \multicolumn{1}{l|}{Destination port from Udp header}                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Total Len}     & \multicolumn{1}{l|}{From IPv4 header}                                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Flags}         & \multicolumn{1}{l|}{From IPv4 header}                                                                                                                    \\ \cline{2-3} 
+\multicolumn{1}{|l|}{}                            & \multicolumn{1}{l|}{Ctrl}          & \multicolumn{1}{l|}{From Tcp header}                                                                                                                     \\ \hline
+                                                  &                                    &                                                                                                                                                         
+\end{tabular}
+\end{table}
+\fi

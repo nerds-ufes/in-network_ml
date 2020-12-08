@@ -1,0 +1,11 @@
+\section{Conclusions and Future Work}\label{sec:conc}
+In this paper, we have introduced a framework for in-network classification addressing the problem of creating simple and reasonably accurate ML models that can be deployed into the programmable data plane with minor performance degradation. We validate our framework with an IDS use case. We implement decision tree models using the BMv2 emulator \cite{p4-bmv2} and deploy them into a Netronome SmartNIC, as a proof-of-concept. Our results show that high-accuracy is achievable (above  95\%). 
+
+In addition to the specific ongoing/future tasks enumerated in Section \ref{sub:disc}, this work motivates a series of broader questions and research directions. 
+First, as in our IDS case study, are there other networking scenarios where flows can be classified appropriately after observing only a few of its packets?
+Second, given the optimizations previously discussed, is it possible to use per-flow models in more sophisticated devices (e.g., Barefoot Tofino - TNA)?
+Finally, can we combine our in-network classifier with smart agents that decide when to perform new measurements and train/deploy new models?
+
+If these questions can be positively answered, then the work presented in this manuscript can be seen as part of a broader framework. One that is capable of performing complex networking functions, with little human supervision and intervention. % Therefore, our contributions represent a, perhaps small, step towards a future when networks may run themselves. 
+
+
