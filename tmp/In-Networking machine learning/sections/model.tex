@@ -1,0 +1,78 @@
+
+
+\subsection{Feature Extractor}\label{sub:features}
+
+A crucial step in machine learning is to precisely identify the objects of study and the characteristics, i.e., features, that define those objects.
+Traditionally, networking traffic data focus on two objects (or granularities), \emph{flows} or \emph{packets}, and features are extracted from headers and payloads.
+The right choice of granularity and features heavily depends on the application. 
+
+There is a trade-off when choosing between a per-packet or a per-flow model, especially in our context, where the goal is to build high-accuracy models capable of processing packets at line-rate. On one hand, per-flow features can be computed by aggregating information from several packets, and by exploring these richer features, it is possible to train better models than when using only packets. On the other hand, in order to classify a flow, it is necessary to keep up-to-date flows' states in memory, which can be resource intensive. Hence, a per-packet model has the potential to be more efficient, but it does not offer to the model aggregated measurements and the possibility of learning from temporal correlation.
+
+\begin{figure*}[t] 
+    \centering
+        \includegraphics[scale=0.6]{figures/simple_tree_flow.pdf}
+        \includegraphics[scale=0.6]{figures/simple_tree_pkt.pdf}
+        \caption{Examples of decision trees for classifying flows (left) and packets (right).}
+        \label{fig:dtexample}
+\end{figure*}
+
+Once the proper granularity is defined, in general, as many features as possible are extracted from the data. Then, feature selection and/or dimensionality reduction techniques are applied in order to restrict the set of candidates to a new set, with the more adequate and/or informative ones. 
+Unfortunately, the processes of extracting and applying transformations to features commonly rely on operations (or primitives) that can not be easily (or efficiently) expressed in P4, our target language.
+
+A canonical example of this issue is the lack of floating-point operations in P4. This characteristic of the language (and in many cases of the underlying hardware as well) disallows us to compute standard metrics (e.g., average and standard deviation) and to apply important data transformations (e.g., logarithm). Therefore, one must be aware of these limitations when building a model. Otherwise, it will not be possible to translate the model in question to a P4 application, and the task of in-network classification will not be achieved.
+In Section \ref{sec:case}, we discuss how we overcame this issue when instantiating our framework for the scenario of intrusion detection.
+
+
+\subsection{Machine Learning Model Builder}\label{sub:builder}
+
+Once the dataset is ready, the next step is to build the classification model. The machine learning literature has a plethora of supervised learning techniques, but not all of them are suitable for our task in hand. More specifically, in addition to the usual requirements of a ML model (e.g., accuracy and generalization), here we are interested in building a model, $f$, that satisfies the following properties when classifying an instance $\mathbf{x}$:
+\begin{enumerate}
+    \item the necessary operations to compute $f(\mathbf{x})$ must be readily available in P4; and
+    \item computing $f(\mathbf{x})$ must be fast, given a target hardware.
+\end{enumerate}
+
+For our framework, we decided to use a decision tree in an attempt to satisfy these two properties. It is out of the scope of this work to go into the details of many algorithms to justify our choice. Even so, we provide the main reasons for not choosing the following popular options: $k$-Nearest Neighbors ($k$-NN), Naive Bayes (NB), Support Vector Machine (SVM), and Artificial Neural Network (ANN).
+The interested reader can find more about these methods in the machine learning literature (e.g., \cite{mitchell97,bishop2006,hastie2001,Goodfellow-et-al-2016}).
+
+The $k$-Nearest Neighbors is an instance-based learning algorithm, which means that the model is the training data itself. In addition, sophisticated data-structures are necessary to find the closest elements to a given $\mathbf{x}$, that we wish to classify. Hence, 
+if the target hardware has limited memory and processing power, 
+it is unlikely that the classification operation will satisfy Property (2).
+
+In order to classify an instance $\mathbf{x}$, the Naive Bayes classifier yields the class that maximizes the conditional probability of observing a certain class given $\mathbf{x}$. It is known to be a fast classifier, which means that it satisfies Property (2). However, P4 lacks the exponentiation operation, which is necessary in some variations of algorithm, thus, violating Property (1). Even if using a NB variation that can be expressed in P4, we opted for not doing so because the algorithm is known to give poor classification results when the features in $\mathbf{x}$ are correlated.
+
+
+There are two main versions of the SVM classifier: with a linear or with a non-linear kernel (e.g., Radial Basis Function -- RBF). The former satisfies Properties (1) and (2), but it is only appropriate for linearly-separable problems. The latter is able to deal with more complex problems, but it may violate Property (1), if the kernel demands certain operations (e.g., exponentiation), and Property (2), due to the need of storing all support vectors and executing many kernel computations for classifying a single $\mathbf{x}$.
+
+Similarly to a SVM with a non-linear kernel, classifying a given $\mathbf{x}$ with an ANN is challenging in our scenario. The classification can be costly, for involving matrix-vector multiplication operations, and it may depend on activation functions that are not available in P4.
+
+
+We do not claim that it is not feasible to optimize/adapt/approximate the methods aforementioned to perform in-network classification, but we do argue that a decision tree classifier is a more natural choice for such a task given the P4 language current primitives.
+In order to classify an element $\mathbf{x}$ with a decision tree model, only comparisons are necessary, and those can be easily expressed in P4 through \emph{if-else} statements (more details in Section \ref{sub:compiler}).
+
+\input{sections/p4code}
+
+For instance, suppose that we are interested in a model for classifying packets. Figure \ref{fig:dtexample} shows an example of a decision tree model for three features (\emph{PacketSize}, \emph{TcpDstPort} and \emph{Protocol}) and two classes (\emph{class 0} and \emph{class 1}). When a packet needs to be classified (right of Figure \ref{fig:dtexample}), the first step is to extract the necessary features, i.e., packet size, IPv4 protocol, and TCP destination port, from its headers; the second step is to use theses values to traverse the tree, from root to leaf, respecting the conditions stated in each tree-node; and finally, the last step is to yield the reached leaf's label.
+
+In general, decision tree models are capable of separating non-linear problem, but in some cases, this classifier may not be as powerful as other more complex approaches (e.g., a neural network with several hidden layers). If during the training phase one realizes that a decision tree is not an appropriate choice, then our framework can be easily extended to use a Random Forest model instead. The classification time will grow on the number of trees, but it is also expected to yield more accurate results.
+
+\subsection{ML to P4 Compiler}\label{sub:compiler}
+
+The decision tree is a classic example of a strict binary tree containing $n$ leaves and $2n-1$ nodes. 
+Classifying an element $\mathbf{x}$ with a decision tree involves traversing the tree from root to leaf, respecting the conditions in each node until reaching a leaf. When a leaf is reached, its label is returned.
+Traditionally, in general-purpose programming languages, this process can be easily implemented by using recursion or repetition loops. However, neither of these options are available in the P4 language. Hence, an alternative is to hard-code the tests and labels within the tree-nodes into \emph{if} and \emph{else} statements.
+
+To that end, the \emph{ML to P4 Compiler} component implements a recursive algorithm responsible for traversing the previously trained decision tree in pre-order fashion. The algorithm adds to the P4 code the statement \texttt{if ($<$condition$>$)} if the node being processed is not a leaf. Then, the left subtree represents the path to be followed when \texttt{$<$condition$>$} evaluates to \emph{true}, while the right subtree adds an \texttt{else} to the code, representing the path to be followed when \texttt{$<$condition$>$} evaluates to \emph{false}. 
+A leaf node holds the class to which it belongs, and when this node is reached, a new entry in the code updates the state variable of the current classification.
+
+For instance, the per-flow model presented in Figure \ref{fig:dtexample} (left) is transformed, by the \emph{ML to P4 Compiler} component, into the \emph{if-else} chain contained in Listing~\ref{lst:p4flow}. This Listing also shows how every packet traversing the device is processed. Whenever a new packet arrives, the relevant features from its headers are identified and saved into the pipeline's metadata. 
+Then, a hash identifier that maps the packet to its flow is computed. This hash is calculated based on the source and destination IP addresses, source and destination ports, and the IPv4 Protocol field from the packet's header. Before the classification, the flow's features are updated in the TCAM memory registers.
+After updating the flow's features, a classification occurs in the following \emph{if-else} chain. Eventually, the flow's class will be stored in the \emph{meta.class} variable.
+Next, the table \emph{classtable} drives the packet to the match-action rules defined by the \emph{Controller} component, according to each class and the forwarding or dropping policies.
+
+Similarly to Listing~\ref{lst:p4flow}, Listing~\ref{lst:p4pkt} presents the result of applying the \emph{ML to P4 Compiler} component to the per-packet decision tree of Figure \ref{fig:dtexample}.
+When a new package is received in the pipeline, the relevant features are identified.
+Differently from the per-flow case, there is no need to compute hash functions or update flow's features. In fact, the packet's features are accessed directly from its headers.
+When the \emph{if-else} chain is finalized, the packet's class is stored in the \emph{meta.class} variable.
+Finally, the pipeline is then directed to apply the \emph{classtable} match-action rules defined by the \emph{Controller} component according to each class and the forwarding or dropping policies.
+
+

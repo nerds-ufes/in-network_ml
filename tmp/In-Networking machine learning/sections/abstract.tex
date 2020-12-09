@@ -1,0 +1,6 @@
+Deploying accurate machine learning algorithms into a high-throughput networking environment is a challenging task. On one hand, machine learning has proved itself useful for traffic classification in many contexts (e.g., intrusion detection, application classification, and early heavy hitter identification).
+On the other hand, most of the work in the area is related to post-processing (i.e., training and testing are performed offline on previously collected samples) or to scenarios where the traffic has to leave the data plane to be classified (i.e., high latency).
+In this work, we tackle the problem of creating simple and reasonably accurate machine learning models that can be deployed into the data plane in a way that performance degradation is acceptable.
+To that purpose, we introduce a framework and discuss issues related to the translation of simple models, for handling individual packets or flows, into the P4 language.
+We validate our framework with an intrusion detection use case and by deploying a single decision tree into a Netronome SmartNIC (Agilio CX 2x10GbE). 
+Our results show that high-accuracy is achievable (above 95\%) with minor performance degradation, even for a large number of flows.

@@ -1,0 +1,47 @@
+\section{Introduction}
+
+%Our Goal: propose a framework based on machine learning to classify network traffic using P4. We are not interested in packet classification, but flow/session.
+
+% Magnos 
+
+%Machine Learning (ML) has driven a technological revolution with an unprecedented number of applications that enable automation in wide range of domains. This has happened due to the explosion in the availability of data, significant improvements in ML techniques, and advancement in computing capabilities. %ML goal is essentially  to identify and exploit hidden patterns in “training” so that a program is created (i.e., model) that fits the data.
+
+In the recent years, we have seen an increasingly interest in research applying Machine Learning (ML) techniques to networking problems \cite{boutaba2018comprehensive}. On one hand, it has been motivated by technological advances in networking, such as network programmability via Software-Defined Networking (SDN) \cite{P4}. On the other hand, recent advances in ML have made these techniques flexible and resilient to make them applicable to various real-world scenarios. While programmable switches have been proven to be useful for in-network computing \cite{In-net-computation}, machine learning within programmable switches have had little success so far \cite{xiong2019switches}. 
+
+With the rise of in-networking computing, the interest in running ML within network devices is rapidly growing for multiple reasons. Firstly, switches offer very high performance. The latency through a switch is in the order of nanoseconds per packet \cite{Tofino}, while high-end ML accelerators operate at the scale of tens of microseconds to milliseconds per inference \cite{Tensor}. Also, there are programmable devices such as smart NICs (e.g. Netronome \cite{NETRONOME}, Cavium \cite{CAVIUM} and Mellanox \cite{MELLANOX}) that can be placed at servers for accelerating ML use-cases. 
+
+Another important motivation to push ML to programmable devices is that the performance of distributed ML is bounded by time required to get data to and from nodes. Therefore, if a switch can classify at the same rate that it carries packets to nodes in a distributed system, then it will equal or outperform any single node \cite{xiong2019switches}. In practice, if a smartNIC is deployed at the edge, the devices allow to terminate data early, reducing the load on the network and improving user experience thanks to reduced latency \cite{PIaFFE}.  
+
+One of the challenges to implement ML algorithms within network devices is the hardware implementation complexity required to support mathematical operations. Operations such as addition, xor or bit shifting are feasible, but multiplication, polynomials or logarithms are not pipelined well. However, the RMT architecture \cite{bosshart2013forwarding} has a flexible parser and a customizable match-action
+engine. To process packets at high speed, this architecture has a multi-stage pipeline where packets flow at line rate. It
+allows lookups in memory (SRAM and TCAM), manipulating packet metadata and stateful registers, and performing boolean and arithmetic operations using ALUs. We believe that with this new generation of programmable hardware, it is worth rising a  question: \textit{can we claim that programmable switches do in-network classification?}
+
+In this paper, our focus is on deploying ML classification trained models showing how to express them into the existing P4 language primitives. More specifically, our contributions are:
+\begin{itemize}
+    \item we introduce an innovative framework that enables the transformation of decision-tree models into P4 language pipeline; and
+    \item as proof-of-concept, we build an in-network classifier for an IDS (Intrusion Detection System). We validate our implementation by using the BMv2 emulator \cite{p4-bmv2} and by deploying it into a Netronome SmartNIC. 
+\end{itemize}
+
+\if 0
+In this paper, our focus is on deploying ML classification trained models showing how to express them into the existing P4 language primitives. More specifically, we introduce an innovative framework that enables the transformation of decision-tree models into P4 language pipeline. As a second contribution, we build as proof-of-concept an in-network classification for an IDS use case, deploying it in a Netronome SmartNIC. 
+
+Our evaluation results have shown that high-accuracy for traffic classification is achievable (above  95\%) with minor performance degradation. We demonstrate a clear trade-off between accuracy and efficiency when choosing a per-packet or per-flow model. Classifying a flow  leads to more accurate results, at the cost of keeping tables' state (e.g. per-flow). In contrast, the per-packet model is stateless having lower accuracy but suffers from the issue of flow fragmentation.
+\fi
+
+We conducted extensive experiments in order to assess the models' quality and efficiency.
+Our evaluation results have shown that high-accuracy for traffic classification is achievable (above  95\%) with minor performance degradation. 
+We demonstrate a clear trade-off between accuracy and efficiency when choosing a per-packet or per-flow model. 
+Classifying a flow  leads to more accurate results, at the cost of keeping tables' state, and it can be performed by observing only a few of its packets, i.e., when the flow is still ``young''. In contrast, the per-packet model is stateless having lower accuracy but suffering from the issue of flow fragmentation (i.e., different labels for packets in the same flow).
+
+
+%Finally, we evaluate the classification feasibility, accuracy and performance.  
+
+% Tem que melhorar o texto neste parágrafo.  Furthermore, we show that accuracy can be high even when classifying with a very few number of packets.
+
+ %Furthermore, we show that as long as the set of features is static, updates to classification models can be deployed through the control plane alone, without changes to the data plane.
+
+The remaining of this work is organized as follows. Section \ref{sec:methodology} presents the framework's architecture and implementation decisions. In Section \ref{sec:case}, we show how our methodology can be used to support intrusion detection. We position our work in the literature in Section \ref{sec:rw} and in Section \ref{sec:conc}, we present concluding remarks and directions for future work.
+
+%The networking community has begun to lay the foundation for network programmability through fully programmable protocol-independent data planes (e.g.,the Barefoot Tofino chipset [5] and Netronome NICs [30]) with domain specific language (e.g., P4 [6]). These advances have allowed the data planes to support a programmatic network control, not only over forwarding (as SDN has enabled) but also over the collection of measurement data. 
+
+
