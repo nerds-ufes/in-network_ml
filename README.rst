@@ -24,7 +24,7 @@ Confusion Matrixes
 Next Confusion Matrix graphics are relative to classification results achieved by *MAP4* in two proposed use-cases scenarios: (a) Intrusion Detection System (IDS), and; (b) Internet of Things (IoT).  
 
 .. raw:: html
-    <p float="left">
+    <p align="center">
         <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png" height="400px"/> 
         <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png" width="400px"/> 
         <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpacket.png" width="400px"/> 
