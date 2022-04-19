@@ -30,9 +30,6 @@ Next Confusion Matrix graphics are relative to classification results achieved b
 </p>  
 
 
-.. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmflow.png
-
-
-.. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmflow_first.png
-
-.. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpkt.png
+<img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmflow.png" />
+<img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmflow_first.png" />
+<img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpkt.png" />
