@@ -1,5 +1,4 @@
 
-============================= 
 In-Network Machine Learning
 =============================
 In-network machine learning experiment repository.
@@ -23,19 +22,12 @@ Confusion Matrixes
 ------------------
 Next Confusion Matrix graphics are relative to classification results achieved by *MAP4* in two proposed use-cases scenarios: (a) Intrusion Detection System (IDS), and; (b) Internet of Things (IoT).  
 
-![A test image](https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png)
-
-
-.. raw:: html
+<p align="center"><img src="">
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png" width="200" />
-  
-.. raw:: html    
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png" width="200" />
-  
-.. raw:: html
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpacket.png" width="200" />
   
-  
+</p>  
 
 
 .. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmflow.png
