@@ -25,10 +25,7 @@ Next Confusion Matrix graphics are relative to classification results achieved b
 
 .. raw:: html
 
-    <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png" height="400px">
-    
-    
-<img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png" width="425"/> 
+    <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png" height="400px"> <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png" width="425"/> 
 
 
 ![alt-text-1]( "title-1") ![alt-text-2]( "title-2") ![alt-text-3](https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpacket.png "title-3") 
