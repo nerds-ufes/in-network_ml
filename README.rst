@@ -26,7 +26,7 @@ Next Confusion Matrix graphics are relative to classification results achieved b
 
 
 .. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png
- :align: right
+    :align: center
 
 .. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png
 
