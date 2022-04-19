@@ -22,6 +22,6 @@ It contains the source codes to run the experiments into the Smartnic Netronome 
 Confusion Matrixes
 ------------------
 Next Confusion Matrix graphics are relative to classification results achieved by *MAP4* in two proposed use-cases scenarios: (a) Intrusion Detection System (IDS), and; (b) Internet of Things (IoT).  
-.. <script src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.pdf"></script>
+.. raw:: html <script src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.pdf"></script>
 .. image:: https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.pdf
     :
