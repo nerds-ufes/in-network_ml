@@ -26,9 +26,10 @@ Next Confusion Matrix graphics are relative to classification results achieved b
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png" width="200" />
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png" width="200" />
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpacket.png" width="200" />
-  <br/>
-CICIDS2017 Confusion matrices for: per-flow classification after the last (left) and the first (middle) packets of each flow are observed; and per-packet classification (right). Values are normalized by the sum of each row. 
 </p>  
+CICIDS2017 Confusion matrices for: per-flow classification after the last (left) and the first (middle) packets of each flow are observed; and per-packet classification (right). Values are normalized by the sum of each row. 
+<br/>
+<br/>
 <br/>
 <br/>
 
@@ -38,11 +39,15 @@ CICIDS2017 Confusion matrices for: per-flow classification after the last (left)
 UNSW-IoT Confusion matrix per-flow classification after the last packets of each flow are observed.
 <br/>
 <br/>
+<br/>
+<br/>
 
 <p align="center">
 <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmflow_first.png" />
 <p/>
 UNSW-IoT Confusion matrix per-flow classification after the first packets of each flow are observed.
+<br/>
+<br/>
 <br/>
 <br/>
 <p align="center">
