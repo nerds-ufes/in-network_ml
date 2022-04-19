@@ -14,10 +14,10 @@ Training directory
 It contains python3 scripts responsible for transforming data from pcap files, in models suitable for deployment in the network layer.
 
 
-Emulator directory
--------------------
-It contains the emulation environment with Mininet running SimpleSwitch (BMv2) to run the emulated experiments.
-TODO: to describe the enviroment, packets and scripts to run P4 into Mininet.
+#Emulator directory
+#-------------------
+#It contains the emulation environment with Mininet running SimpleSwitch (BMv2) to run the emulated experiments.
+#TODO: to describe the enviroment, packets and scripts to run P4 into Mininet.
 
 
 Smartnic directory
