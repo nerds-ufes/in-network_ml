@@ -22,11 +22,12 @@ Confusion Matrixes
 ------------------
 Next Confusion Matrix graphics are relative to classification results achieved by *MAP4* in two proposed use-cases scenarios: (a) Intrusion Detection System (IDS), and; (b) Internet of Things (IoT).  
 
-<p align="center"><img src="">
+<p align="center">
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmlast.png" width="200" />
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmfirst.png" width="200" />
   <img src="https://github.com/nerds-ufes/in-network_ml/blob/main/figures/cmpacket.png" width="200" />
-  
+  Confusion matrices for: per-flow classification after the last (left) and the first (middle) packets of each flow are observed; and per-packet classification
+(right). Values are normalized by the sum of each row.
 </p>  
 
 
