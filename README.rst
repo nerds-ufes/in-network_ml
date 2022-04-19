@@ -18,4 +18,8 @@ Smartnic directory
 -------------------
 It contains the source codes to run the experiments into the Smartnic Netronome (https://www.netronome.com/products/agilio-cx/)
 
+
+Confusion Matrixes
+------------------
 Next Confusion Matrix graphics are relative to classification results achieved by *MAP4* in two proposed use-cases scenarios: (a) Intrusion Detection System (IDS), and; (b) Internet of Things (IoT).  
+
